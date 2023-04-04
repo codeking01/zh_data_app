@@ -7,71 +7,134 @@
 
 # 继承这个类  py可以多继承
 import sys
+import threading
+import time
 from threading import Thread
 
 from PySide6 import QtWidgets, QtCore
-from PySide6.QtCore import Slot, Signal, QThread
-from PySide6.QtWidgets import QFileDialog, QMessageBox, QLabel
+from PySide6.QtCore import Slot, Signal, QThread, QCoreApplication
+from PySide6.QtWidgets import QFileDialog, QMessageBox, QLabel, QApplication, QWidget
 
 from Signal import my_signal
-from pubchemui import Ui_zh_data_app
+from zh_appui import Ui_zh_data_app
 
 
-class View(QtWidgets.QWidget, Ui_zh_data_app):
+class View(QWidget, Ui_zh_data_app):
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, '退出提示', '您确定要退出吗？', QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         # 设置线程函数
         self.mysignal = Signal()
-        #设置背景图
-        # self.setStyleSheet(u"background-image: url(:/resource/a_bg);")
-        # 设置标题
-        # self.setWindowTitle("pubchem转化数据工具")
-        self.csv_path = ''
-        self.sdf_path = ''
-        self.excel_path = ''
-        # 需要转化的excel的地址
-        self.ReadyToConvertExcel_path=''
-
-        # 转化excel的状态
-        self.ConvertToExcelFlag = False
-        # 选择存储mol的路径
-        self.Save2DMolPath = ''
-        self.Save3DMolPath = ''
-        # 选择图片文件地址
-        self.SelectPicPath = ''
-        self.SavePicPath = ''
-        # txt生成的地址
-        self.savetxtpath = r'D:/DATA/'
         # 槽函数自定义绑定
         self.bind()
-
+        my_signal.SetProgressBar.emit(self.train_progressBar, "程序未运行...", 0)
+        my_signal.SetProgressBar.emit(self.predict_progressBar, "程序未运行...", 0)
+        # 设置训练的子线程
+        self.train_worker = None
+        # 设置预测的子线程
+        self.predict_worker = None
+        self.stop_events = {}
 
     def bind(self):
         # 和生成数字按钮绑定
         # self.GenerateNumsButton.clicked.connect(self.GenerateNumbers)
-        my_signal.SetGenState.connect(self.setstatelabel)
-        my_signal.popMeg.connect(self.PopMeg)
-        my_signal.SetlabelValue.connect(self.SetAlllabelValue)
+        my_signal.SetProgressBar.connect(self.set_progressBar)
+        my_signal.PopMeg.connect(self.pop_meg)
+        my_signal.SetLabelValue.connect(self.set_all_label_value)
 
     # 设置label的内容
-    def SetAlllabelValue(self,value:str,components:object):
-        self.components=components
+    def set_all_label_value(self, value: str, components: QLabel):
+        self.components = components
         self.components.setText(value)
 
     # 定义弹窗的方法
-    def PopMeg(self,value:str):
+    def pop_meg(self, value: str):
         QMessageBox.information(self, '提示', value)
 
-
-    def  setstatelabel(self,value:str):
-        self.GenNumsState.setText(value)
-
+    def set_progressBar(self, progress_obj, state: str, value: int):
+        # 这个是显示进度条的方法
+        progress_obj.setFormat(f'{state}')
+        progress_obj.setValue(int(value))
 
     @Slot()
-    def on_load_Modeling_files_clicked(self):
-        print('load_Modeling_files_clicked')
+    def on_predict_button_clicked(self):
+        def workerThreadFunc():
+            for i in range(100000):
+                my_signal.SetProgressBar.emit(self.predict_progressBar, "正在运行...", i / 1000)
+            my_signal.SetProgressBar.emit(self.predict_progressBar, "运行结束...", 100)
 
+        # 创建子线程
+        worker = Thread(target=workerThreadFunc)
+        worker.start()
+        # 禁用按钮
+        self.predict_button.setEnabled(False)
+
+    @Slot()
+    def on_train_button_clicked(self):
+        stop_event = threading.Event()
+        self.stop_events["train_work"] = stop_event
+        # 开启子线程去操作，并动态显示进度条
+        def workerThreadFunc():
+            for i in range(100000):
+                my_signal.SetProgressBar.emit(self.train_progressBar, "正在运行...", i / 1000)
+            my_signal.SetProgressBar.emit(self.train_progressBar, "运行结束...", 100)
+
+        # 创建子线程
+        self.train_worker = Thread(target=workerThreadFunc)
+        self.train_worker.start()
+        # 禁用按钮
+        self.train_button.setEnabled(False)
+
+    # 提前终止这个线程
+    @Slot()
+    def on_train_stop_button_clicked(self):
+        # todo 终止子线程
+        print("sss")
+        # 终止train_button的线程
+        print(self.stop_events.get("train_work"))
+        self.stop_events.get("train_work").set()
+
+    # 选择建模文件
+    @Slot()
+    def on_load_modeling_files_clicked(self):
+        # 选择excel文件
+        file_path = QFileDialog.getOpenFileName(self, '选择建模文件', '',
+                                                '选择Excel文件 (*.xlsx *.xls);;所有文件类型 (*)')
+        if file_path[0] != '':
+            modeling_path = file_path[0].split('/')[-1]
+            my_signal.SetLabelValue.emit(modeling_path, self.modeling_file_path)
+
+    # 选择其他训练模型
+    @Slot()
+    def on_load_modeling_exist_files_clicked(self):
+        choice = QMessageBox.question(self, '确认', '您确认要执行该操作?')
+        if choice == QMessageBox.Yes:
+            file_path = QFileDialog.getOpenFileName(self, '选择其他训练模型', '', '(*)')
+            if file_path[0] != '':
+                modeling_path = file_path[0].split('/')[-1]
+                # 去操作 modeling_file_path
+                my_signal.SetLabelValue.emit(modeling_path, self.modeling_exist_file_path)
+        else:
+            pass
+
+    # 选择预测文件
+    @Slot()
+    def on_load_predict_files_clicked(self):
+        file_path = QFileDialog.getOpenFileName(self, '选择预测文件', '',
+                                                '选择Excel文件 (*.xlsx *.xls);;所有文件类型 (*)')
+        if file_path[0] != '':
+            modeling_path = file_path[0].split('/')[-1]
+            my_signal.SetLabelValue.emit(modeling_path, self.predict_file_path)
+
+    # 去操作 modeling_file_path
     # # 生成数字的编辑栏
     # @Slot()
     # def on_NumsEdit_textChanged(self):
@@ -411,16 +474,25 @@ class View(QtWidgets.QWidget, Ui_zh_data_app):
     #     elif choice == QMessageBox.No:
     #         print('取消')
 
+
 if __name__ == '__main__':
-    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     # 设置风格样式 Fusion,windows,windowsvista
     app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
-    # window = QMainWindow() # 看自己的选择
-    # window = QtWidgets.QWidget()  # 看自己的选择
     view = View()
-    # view.setupUi(window)
-    # view.setupUi(view)  这个可以放在构造函数中
-    # window.show()
     view.show()
     sys.exit(app.exec())
+
+# if __name__ == '__main__':
+#     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+#     app = QtWidgets.QApplication(sys.argv)
+#     # 设置风格样式 Fusion,windows,windowsvista
+#     app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
+#     # window = QMainWindow() # 看自己的选择
+#     # window = QtWidgets.QWidget()  # 看自己的选择
+#     view = View()
+#     # view.setupUi(window)
+#     # view.setupUi(view)  这个可以放在构造函数中
+#     # window.show()
+#     view.show()
+#     sys.exit(app.exec())
