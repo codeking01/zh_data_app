@@ -4,11 +4,12 @@
     @Data : 2022/5/1 17:49
     @File : main.py.py
 """
-
-# 继承这个类  py可以多继承
+import concurrent.futures
+import multiprocessing
 import sys
 import threading
 import time
+from multiprocessing import Process
 from threading import Thread
 
 from PySide6 import QtWidgets, QtCore
@@ -17,6 +18,11 @@ from PySide6.QtWidgets import QFileDialog, QMessageBox, QLabel, QApplication, QW
 
 from Signal import my_signal
 from zh_appui import Ui_zh_data_app
+
+
+# 继承这个类  py可以多继承
+def computer_model():
+    return False
 
 
 class View(QWidget, Ui_zh_data_app):
@@ -31,17 +37,16 @@ class View(QWidget, Ui_zh_data_app):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        # 设置线程函数
         self.mysignal = Signal()
         # 槽函数自定义绑定
         self.bind()
         my_signal.SetProgressBar.emit(self.train_progressBar, "程序未运行...", 0)
         my_signal.SetProgressBar.emit(self.predict_progressBar, "程序未运行...", 0)
-        # 设置训练的子线程
+        # 设置子线程
         self.train_worker = None
-        # 设置预测的子线程
         self.predict_worker = None
-        self.stop_events = {}
+        # 设置线程状态
+        self.work_threads = {}
 
     def bind(self):
         # 和生成数字按钮绑定
@@ -66,44 +71,81 @@ class View(QWidget, Ui_zh_data_app):
 
     @Slot()
     def on_predict_button_clicked(self):
-        def workerThreadFunc():
-            for i in range(100000):
-                my_signal.SetProgressBar.emit(self.predict_progressBar, "正在运行...", i / 1000)
+        self.work_threads["predict_work"] = True
+
+        def predict_work_thread():
+            # 设置一格一格动,一直循环
+            i = 0
+            # 让进度条一直循环
+            while True:
+                # 计算结束
+                if computer_model():
+                    break
+                if not self.work_threads["predict_work"]:
+                    my_signal.SetProgressBar.emit(self.predict_progressBar, "运行终止!!!", i)
+                    self.predict_button.setEnabled(True)
+                    self.work_threads["predict_work"] = False
+                    return
+                i += 1
+                if i > 100:
+                    i = 0
+                my_signal.SetProgressBar.emit(self.predict_progressBar, "正在运行...", i)
+                time.sleep(0.1)
             my_signal.SetProgressBar.emit(self.predict_progressBar, "运行结束...", 100)
+            self.predict_button.setEnabled(True)
+            self.work_threads["predict_work"] = False
 
         # 创建子线程
-        worker = Thread(target=workerThreadFunc)
+        worker = Thread(target=predict_work_thread)
         worker.start()
         # 禁用按钮
         self.predict_button.setEnabled(False)
 
+    @Slot()  # 提前终止这个线程
+    def on_predict_stop_button_clicked(self):
+        if self.work_threads["predict_work"]:
+            self.work_threads["predict_work"] = False
+            self.predict_button.setEnabled(True)
+
     @Slot()
     def on_train_button_clicked(self):
-        stop_event = threading.Event()
-        self.stop_events["train_work"] = stop_event
-        # 开启子线程去操作，并动态显示进度条
-        def workerThreadFunc():
-            for i in range(100000):
-                my_signal.SetProgressBar.emit(self.train_progressBar, "正在运行...", i / 1000)
-            my_signal.SetProgressBar.emit(self.train_progressBar, "运行结束...", 100)
+        self.work_threads["train_work"] = True
 
-        # 创建子线程
-        self.train_worker = Thread(target=workerThreadFunc)
+        # 开启子线程去操作，并动态显示进度条
+        # todo 需要改成多进程去操作
+        def train_worker_thread():
+            i = 0
+            # 让进度条一直循环
+            while True:
+                # 计算结束
+                if computer_model():
+                    break
+                if not self.work_threads["train_work"]:
+                    my_signal.SetProgressBar.emit(self.train_progressBar, "运行终止!!!", i)
+                    self.predict_button.setEnabled(True)
+                    self.work_threads["train_work"] = False
+                    return
+                i += 1
+                if i > 100:
+                    i = 0
+                my_signal.SetProgressBar.emit(self.train_progressBar, "正在运行...", i)
+                time.sleep(0.1)
+            my_signal.SetProgressBar.emit(self.train_progressBar, "运行结束!", 100)
+            self.train_button.setEnabled(True)
+            self.work_threads["train_work"] = False
+
+        self.train_worker = Thread(target=train_worker_thread)
         self.train_worker.start()
         # 禁用按钮
         self.train_button.setEnabled(False)
 
-    # 提前终止这个线程
-    @Slot()
+    @Slot()  # 提前终止这个线程
     def on_train_stop_button_clicked(self):
-        # todo 终止子线程
-        print("sss")
-        # 终止train_button的线程
-        print(self.stop_events.get("train_work"))
-        self.stop_events.get("train_work").set()
+        if self.work_threads["train_work"]:
+            self.work_threads["train_work"] = False
+            self.train_button.setEnabled(True)
 
-    # 选择建模文件
-    @Slot()
+    @Slot()  # 选择建模文件
     def on_load_modeling_files_clicked(self):
         # 选择excel文件
         file_path = QFileDialog.getOpenFileName(self, '选择建模文件', '',
@@ -115,7 +157,7 @@ class View(QWidget, Ui_zh_data_app):
     # 选择其他训练模型
     @Slot()
     def on_load_modeling_exist_files_clicked(self):
-        choice = QMessageBox.question(self, '确认', '您确认要执行该操作?')
+        choice = QMessageBox.question(self, '确认', '当前已有模型，您确认要执行该操作？请慎重！')
         if choice == QMessageBox.Yes:
             file_path = QFileDialog.getOpenFileName(self, '选择其他训练模型', '', '(*)')
             if file_path[0] != '':
