@@ -16,8 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QGroupBox,
-    QLabel, QProgressBar, QPushButton, QSizePolicy,
-    QSpacerItem, QWidget)
+    QHBoxLayout, QLabel, QProgressBar, QPushButton,
+    QSizePolicy, QSpacerItem, QWidget)
 import res_rc
 
 class Ui_zh_data_app(object):
@@ -25,7 +25,7 @@ class Ui_zh_data_app(object):
         if not zh_data_app.objectName():
             zh_data_app.setObjectName(u"zh_data_app")
         zh_data_app.setEnabled(True)
-        zh_data_app.resize(873, 494)
+        zh_data_app.resize(846, 487)
         font = QFont()
         font.setStrikeOut(True)
         font.setKerning(False)
@@ -38,9 +38,10 @@ class Ui_zh_data_app(object):
         zh_data_app.setWindowIcon(icon)
         zh_data_app.setLayoutDirection(Qt.LeftToRight)
         zh_data_app.setStyleSheet(u"")
+        self.horizontalLayout = QHBoxLayout(zh_data_app)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.groupBox_4 = QGroupBox(zh_data_app)
         self.groupBox_4.setObjectName(u"groupBox_4")
-        self.groupBox_4.setGeometry(QRect(30, 10, 821, 451))
         self.groupBox_4.setStyleSheet(u"background-color: rgb(255, 255, 255);")
         self.gridLayout_7 = QGridLayout(self.groupBox_4)
         self.gridLayout_7.setObjectName(u"gridLayout_7")
@@ -166,6 +167,7 @@ class Ui_zh_data_app(object):
 
         self.groupBox = QGroupBox(self.groupBox_2)
         self.groupBox.setObjectName(u"groupBox")
+        self.groupBox.setCursor(QCursor(Qt.ArrowCursor))
         self.gridLayout_5 = QGridLayout(self.groupBox)
         self.gridLayout_5.setObjectName(u"gridLayout_5")
         self.train_stop_button = QPushButton(self.groupBox)
@@ -256,9 +258,10 @@ class Ui_zh_data_app(object):
 
         self.load_modeling_exist_files = QPushButton(self.groupBox_6)
         self.load_modeling_exist_files.setObjectName(u"load_modeling_exist_files")
+        self.load_modeling_exist_files.setEnabled(False)
         self.load_modeling_exist_files.setMinimumSize(QSize(90, 0))
         self.load_modeling_exist_files.setMaximumSize(QSize(100, 16777215))
-        self.load_modeling_exist_files.setCursor(QCursor(Qt.PointingHandCursor))
+        self.load_modeling_exist_files.setCursor(QCursor(Qt.ForbiddenCursor))
         self.load_modeling_exist_files.setStyleSheet(u"")
 
         self.gridLayout.addWidget(self.load_modeling_exist_files, 0, 0, 1, 1, Qt.AlignLeft)
@@ -290,6 +293,9 @@ class Ui_zh_data_app(object):
 
 
         self.gridLayout_7.addWidget(self.groupBox_2, 0, 1, 1, 1)
+
+
+        self.horizontalLayout.addWidget(self.groupBox_4)
 
 
         self.retranslateUi(zh_data_app)
