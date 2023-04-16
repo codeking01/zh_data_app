@@ -11,6 +11,7 @@ from math import ceil
 # 所有的方法汇总
 # 先判断缺失数据的的条件 这个以百分之70为基准
 import numpy as np
+import pandas as pd
 
 
 def del_deletion_data(data_value, flag):

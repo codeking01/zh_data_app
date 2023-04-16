@@ -13,6 +13,20 @@ from src.utils.model_utils.mian_utils import get_develop_pred_data, convert_to_m
     develop_save_model, normalization_develop_y, normalization_predict_y
 
 
+# 使用pandas复制openpyxl的excel，然后复制进去
+def copy_excel_pd(ws=None, filename="new.xlsx", sheet_name="new_sheet"):
+    """
+    :param ws: work_sheet, 传入excel的sheet
+    :param filename:
+    :param sheet_name:
+    :return:
+    """
+    data_rows = list(ws.iter_rows(values_only=True))
+    df = pd.DataFrame(data_rows[1:], columns=data_rows[0])
+    # 使用 DataFrame 对象将数据写入 Excel 文件
+    df.to_excel(f"{filename}", sheet_name=f'{sheet_name}', index=False)
+
+
 def del_raw_col_data(data_value, flag):
     """
     :param data_value: 需要处理的数据
@@ -38,26 +52,7 @@ def del_raw_col_data(data_value, flag):
     data_value_copy = np.delete(data_value_copy, del_list, axis=flag)
     return data_value_copy, del_list
 
-    # 删除缺失值过多的列
-    # if flag == 1:
-    #     # 计算多少列
-    #     cols_length = result_list[0, :].size
-    #     # 计算里面缺失值大于0.3的
-    #     for index in range(cols_length):
-    #         item = result_list[:, index]
-    #         lock_list = [i for i in item if i]
-    #         if len(lock_list) / len(item) > 0.3:
-    #             del_list.append(index)
-    # # 删除含有缺失值的行
-    # elif flag == 0:
-    #     rows_length = result_list[:, 0].size
-    #     for index in range(rows_length):
-    #         item = result_list[index, :]
-    #         # 判断是否有缺失
-    #         if True in item:
-    #             del_list.append(index)
-    # data_value_copy = np.delete(data_value_copy, del_list, axis=flag)
-    # return data_value_copy, del_list
+    # 删除缺失值过多的列  # if flag == 1:  #     # 计算多少列  #     cols_length = result_list[0, :].size  #     # 计算里面缺失值大于0.3的  #     for index in range(cols_length):  #         item = result_list[:, index]  #         lock_list = [i for i in item if i]  #         if len(lock_list) / len(item) > 0.3:  #             del_list.append(index)  # # 删除含有缺失值的行  # elif flag == 0:  #     rows_length = result_list[:, 0].size  #     for index in range(rows_length):  #         item = result_list[index, :]  #         # 判断是否有缺失  #         if True in item:  #             del_list.append(index)  # data_value_copy = np.delete(data_value_copy, del_list, axis=flag)  # return data_value_copy, del_list
 
 
 def gen_init_data(excel_path=None, excel_sheet=None):
@@ -77,7 +72,6 @@ def gen_init_data(excel_path=None, excel_sheet=None):
     excel_data.close()
     sheetnames = load_data.sheetnames
     table = load_data[sheetnames[excel_sheet]]
-    # todo 复制一个新的excel
     # 转化为numpy的数据
     init_np_data = np.array(init_data)
     return init_np_data, table, filename, load_data
@@ -125,8 +119,8 @@ def start_develop_model(develop_x_data=None, develop_y_dict=None, model_dict=Non
 
         # 手动划分数据集，各自一半，按照奇偶
         x_train, _, y_train, _ = get_train_test_data(x_data=develop_x_data_copy, y_data=develop_y_item)
-        develop_save_model(model=RandomForestClassifier(), model_name=y_item, model_dict=model_dict,
-                           x_train=x_train, y_train=y_train)
+        develop_save_model(model=RandomForestClassifier(), model_name=y_item, model_dict=model_dict, x_train=x_train,
+                           y_train=y_train)
     joblib.dump(model_dict, f'./all_models/models.joblib')
     # 删除models_temp.joblib文件
     os.remove(f'./all_models/models_temp.joblib')
@@ -176,12 +170,10 @@ def select_develop_model(excel_path=None, excel_sheet=0):
         order_x_item = x_train_boundary[order_index]
         order_y_item = y_train_boundary[order_index]
         # 建模数据
-        develop_x_data = get_develop_pred_data(excel_data=develop_excel_np_data,
-                                               boundary_x=[3, -1],
+        develop_x_data = get_develop_pred_data(excel_data=develop_excel_np_data, boundary_x=[3, -1],
                                                boundary_y=[2, order_x_item[-1]])
         # 获取每一道工序的 y
-        develop_y_data = get_develop_pred_data(excel_data=develop_excel_np_data,
-                                               boundary_x=[3, -1],
+        develop_y_data = get_develop_pred_data(excel_data=develop_excel_np_data, boundary_x=[3, -1],
                                                boundary_y=[order_y_item[0], order_y_item[-1]])
         # 转化月份
         develop_x_data = convert_to_month(x_data=develop_x_data)
@@ -224,10 +216,10 @@ def select_predict_model(excel_path=None, develop_model_path=r"./all_models/mode
     :return: 预测好的数据写一个新的excel文件
     """
     # todo 到时候将这个predict_excel_table复制过去新表
-    predict_excel_np_data, predict_excel_table, predict_excel_filename, predict_excel_data = \
-        gen_init_data(excel_path=f"{excel_path}", excel_sheet=excel_sheet)
+    predict_excel_np_data, predict_excel_table, predict_excel_filename, predict_excel_data = gen_init_data(
+        excel_path=f"{excel_path}", excel_sheet=excel_sheet)
     # 最大行数
-    max_row=predict_excel_table.max_row + 1
+    max_row = predict_excel_table.max_row + 1
     # 用来训练的x
     x_predict_boundary = [[2, 21], [27, 30], [34, 49], [57, 70], [83, 87]]
     # 用来训练的y
@@ -246,12 +238,10 @@ def select_predict_model(excel_path=None, develop_model_path=r"./all_models/mode
         order_y_item = y_predict_boundary[order_index]
 
         # 获取预测数据
-        predict_x_data = get_develop_pred_data(excel_data=predict_excel_np_data,
-                                               boundary_x=[3, -1],
+        predict_x_data = get_develop_pred_data(excel_data=predict_excel_np_data, boundary_x=[3, -1],
                                                boundary_y=[2, order_x_item[-1]])
         # 获取每一道工序的 y
-        predict_y_data = get_develop_pred_data(excel_data=predict_excel_np_data,
-                                               boundary_x=[3, -1],
+        predict_y_data = get_develop_pred_data(excel_data=predict_excel_np_data, boundary_x=[3, -1],
                                                boundary_y=[order_y_item[0], order_y_item[-1]])
 
         # 转化月份
@@ -283,15 +273,14 @@ def select_predict_model(excel_path=None, develop_model_path=r"./all_models/mode
                 predict_y_item = predict_y_item[use_raw_list]
                 model_predict_data = model.predict(predict_x_item)
                 model_predict_data = np.array(model_predict_data, dtype=int)
-                # 记录准确率
-                predict_accuracy = np.where([model_predict_data - predict_y_item][0] == 0)[0][:].size / predict_y_item[:].size
+                # 记录准确率 todo 要去除空值再去计算准确率 排查最后几个准确率很低的原因 排查excel损坏的原因
+                predict_accuracy = np.where([model_predict_data - predict_y_item][0] == 0)[0][:].size / predict_y_item[
+                                                                                                        :].size
                 print(f"predict_accuracy：{predict_accuracy}")
                 print(f"当前内循环{order_y_item[0] + 1},当前excel的列索引：{k + 1}")
                 record_excel(use_raw_list, k + 1, excel_raw, predict_excel_table, predict_y_item, model_predict_data,
                              predict_accuracy, predict_excel_filename, predict_excel_data,
-                             max_row)
-                # todo 保存到excel中
-                # if "_" in predict_excel_filename:
+                             max_row)  # todo 保存到excel中  # if "_" in predict_excel_filename:
                 #     predict_excel_data.save(f"{predict_excel_filename.split('.')[-2].split('_')[-2]}_new.{predict_excel_filename.split('.')[-1]}")
                 # else:
                 # predict_excel_data.save(f"{predict_excel_filename}")
@@ -316,12 +305,13 @@ def record_excel(use_raw_list, excel_col, excel_raw, predict_excel_table, predic
     # 写入excel里面
     for i in range(use_raw_list.size):
         raw_item = use_raw_list[i]
-        predict_excel_table.cell(raw_item + excel_raw,excel_col).data_type=TYPE_STRING
-        predict_excel_table.cell(raw_item + excel_raw,excel_col).value = f"real:{predict_y_item[i]},predict:{model_predict_data[i]}"
-        # print(predict_excel_table.cell(raw_item + excel_raw, excel_col).value)
+        predict_excel_table.cell(raw_item + excel_raw, excel_col).data_type = TYPE_STRING
+        predict_excel_table.cell(raw_item + excel_raw,
+                                 excel_col).value = f"real:{predict_y_item[i]},predict:{model_predict_data[i]}"  # print(predict_excel_table.cell(raw_item + excel_raw, excel_col).value)
     # 最后写上准确率
-    predict_excel_table.cell(max_row,excel_col).value = f"{accuracy}"
-    excel_data.save(filename)
+    predict_excel_table.cell(max_row, excel_col).value = f"{accuracy}"
+    copy_excel_pd(ws=predict_excel_table, filename="new.xlsx", sheet_name="new_sheet")
+    # excel_data.save(filename)
 
 
 def record_deletion(del_list=None, use_x_cols=None):
