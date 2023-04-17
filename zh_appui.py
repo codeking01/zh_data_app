@@ -34,7 +34,7 @@ class Ui_zh_data_app(object):
         zh_data_app.setTabletTracking(False)
         zh_data_app.setContextMenuPolicy(Qt.NoContextMenu)
         icon = QIcon()
-        icon.addFile(u"icons/tray.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/icons/icons/tray.ico", QSize(), QIcon.Normal, QIcon.Off)
         zh_data_app.setWindowIcon(icon)
         zh_data_app.setLayoutDirection(Qt.LeftToRight)
         zh_data_app.setStyleSheet(u"")

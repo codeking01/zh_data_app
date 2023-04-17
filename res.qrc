@@ -7,6 +7,6 @@
     <file>images/home_03.jpg</file>
   </qresource>
   <qresource prefix="icons">
-    <file>icons/tray.png</file>
+    <file>icons/tray.ico</file>
   </qresource>
 </RCC>

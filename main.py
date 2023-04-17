@@ -6,11 +6,8 @@
 """
 import ctypes
 import sys
-import threading
 import time
 from threading import Thread
-
-import gevent as gevent
 from PySide6 import QtWidgets
 from PySide6.QtCore import Slot, Signal
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QLabel, QApplication, QWidget

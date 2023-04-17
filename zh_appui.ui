@@ -32,8 +32,8 @@
    <string>振华新材料数据建模工具V1.0</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>icons/tray.png</normaloff>icons/tray.png</iconset>
+   <iconset resource="res.qrc">
+    <normaloff>:/icons/icons/tray.ico</normaloff>:/icons/icons/tray.ico</iconset>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
