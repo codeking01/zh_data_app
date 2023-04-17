@@ -17,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QGroupBox,
     QHBoxLayout, QLabel, QProgressBar, QPushButton,
-    QSizePolicy, QSpacerItem, QWidget)
+    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 import res_rc
 
 class Ui_zh_data_app(object):
@@ -25,7 +25,7 @@ class Ui_zh_data_app(object):
         if not zh_data_app.objectName():
             zh_data_app.setObjectName(u"zh_data_app")
         zh_data_app.setEnabled(True)
-        zh_data_app.resize(846, 487)
+        zh_data_app.resize(856, 469)
         font = QFont()
         font.setStrikeOut(True)
         font.setKerning(False)
@@ -54,13 +54,6 @@ class Ui_zh_data_app(object):
 "}")
         self.gridLayout_4 = QGridLayout(self.groupBox_3)
         self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.line = QFrame(self.groupBox_3)
-        self.line.setObjectName(u"line")
-        self.line.setFrameShape(QFrame.HLine)
-        self.line.setFrameShadow(QFrame.Sunken)
-
-        self.gridLayout_4.addWidget(self.line, 1, 0, 1, 1)
-
         self.label = QLabel(self.groupBox_3)
         self.label.setObjectName(u"label")
         self.label.setMinimumSize(QSize(180, 0))
@@ -76,14 +69,44 @@ class Ui_zh_data_app(object):
 
         self.gridLayout_4.addWidget(self.label, 0, 0, 1, 1)
 
-        self.label_4 = QLabel(self.groupBox_3)
+        self.groupBox_5 = QGroupBox(self.groupBox_3)
+        self.groupBox_5.setObjectName(u"groupBox_5")
+        self.groupBox_5.setStyleSheet(u"background-color: rgb(255, 251, 237);")
+        self.verticalLayout = QVBoxLayout(self.groupBox_5)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.label_4 = QLabel(self.groupBox_5)
         self.label_4.setObjectName(u"label_4")
-        self.label_4.setMaximumSize(QSize(300, 16777215))
-        self.label_4.setStyleSheet(u"background-color: rgb(85, 255, 255);")
+        self.label_4.setMaximumSize(QSize(324, 16777215))
+        self.label_4.setStyleSheet(u"")
         self.label_4.setTextFormat(Qt.PlainText)
         self.label_4.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
 
-        self.gridLayout_4.addWidget(self.label_4, 2, 0, 1, 1)
+        self.verticalLayout.addWidget(self.label_4)
+
+        self.label_5 = QLabel(self.groupBox_5)
+        self.label_5.setObjectName(u"label_5")
+        self.label_5.setStyleSheet(u"")
+
+        self.verticalLayout.addWidget(self.label_5)
+
+        self.label_6 = QLabel(self.groupBox_5)
+        self.label_6.setObjectName(u"label_6")
+
+        self.verticalLayout.addWidget(self.label_6)
+
+        self.verticalSpacer_2 = QSpacerItem(20, 230, QSizePolicy.Minimum, QSizePolicy.Fixed)
+
+        self.verticalLayout.addItem(self.verticalSpacer_2)
+
+
+        self.gridLayout_4.addWidget(self.groupBox_5, 2, 0, 1, 1)
+
+        self.line = QFrame(self.groupBox_3)
+        self.line.setObjectName(u"line")
+        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShadow(QFrame.Sunken)
+
+        self.gridLayout_4.addWidget(self.line, 1, 0, 1, 1)
 
 
         self.gridLayout_7.addWidget(self.groupBox_3, 0, 0, 1, 1)
@@ -172,6 +195,7 @@ class Ui_zh_data_app(object):
         self.gridLayout_5.setObjectName(u"gridLayout_5")
         self.train_stop_button = QPushButton(self.groupBox)
         self.train_stop_button.setObjectName(u"train_stop_button")
+        self.train_stop_button.setEnabled(True)
         font3 = QFont()
         font3.setStrikeOut(False)
         font3.setKerning(False)
@@ -208,6 +232,7 @@ class Ui_zh_data_app(object):
 
         self.predict_stop_button = QPushButton(self.groupBox)
         self.predict_stop_button.setObjectName(u"predict_stop_button")
+        self.predict_stop_button.setEnabled(True)
         self.predict_stop_button.setFont(font3)
         self.predict_stop_button.setCursor(QCursor(Qt.PointingHandCursor))
         self.predict_stop_button.setStyleSheet(u"")
@@ -308,7 +333,10 @@ class Ui_zh_data_app(object):
         self.groupBox_4.setTitle("")
         self.groupBox_3.setTitle("")
         self.label.setText(QCoreApplication.translate("zh_data_app", u"\u6b22\u8fce\u4f7f\u7528", None))
+        self.groupBox_5.setTitle("")
         self.label_4.setText(QCoreApplication.translate("zh_data_app", u"\u8bf4\u660e\uff1a", None))
+        self.label_5.setText(QCoreApplication.translate("zh_data_app", u"1.\u5efa\u6a21\u548c\u9884\u6d4b\u53ef\u4ee5\u540c\u65f6\u8fdb\u884c", None))
+        self.label_6.setText(QCoreApplication.translate("zh_data_app", u"2.\u7ed3\u679c\u5b58\u50a8\u5728\u540c\u6587\u4ef6\u5939\u4e0b", None))
         self.groupBox_2.setTitle("")
         self.groupBox_8.setTitle("")
         self.label_2.setText(QCoreApplication.translate("zh_data_app", u"\u8bad\u7ec3\u8fdb\u5ea6\u6761", None))

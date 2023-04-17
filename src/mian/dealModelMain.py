@@ -455,7 +455,7 @@ class OperateModel:
             CommonUtils.start_develop_model(develop_x_data=develop_x_data, use_x_cols=use_x_cols,
                                             develop_y_dict=develop_y_dict,
                                             model_dict=model_dict)
-        print("运行结束！")
+        print("训练运行结束！")
 
     @staticmethod
     def select_predict_model(excel_path=None, develop_model_path=r"./all_models/models.joblib", excel_sheet=1):

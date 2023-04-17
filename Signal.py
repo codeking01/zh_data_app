@@ -8,10 +8,12 @@ from PySide6.QtCore import QObject, Signal
 
 
 class MySignal(QObject):
-    SetProgressBar = Signal(object,str,int)
+    SetProgressBar = Signal(object, str, int)
     PopMeg = Signal(str)
     # SetConvertState=Signal(str)
     SetLabelValue = Signal(str, object)
+    # 程序运行结束的弹窗
+    PopWindow = Signal(str)
 
 
 my_signal = MySignal()

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>846</width>
-    <height>487</height>
+    <width>856</width>
+    <height>469</height>
    </rect>
   </property>
   <property name="font">
@@ -74,13 +74,6 @@
          <string/>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
-         <item row="1" column="0">
-          <widget class="Line" name="line">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label">
            <property name="minimumSize">
@@ -117,24 +110,76 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="maximumSize">
-            <size>
-             <width>300</width>
-             <height>16777215</height>
-            </size>
-           </property>
+          <widget class="QGroupBox" name="groupBox_5">
            <property name="styleSheet">
-            <string notr="true">background-color: rgb(85, 255, 255);</string>
+            <string notr="true">background-color: rgb(255, 251, 237);</string>
            </property>
-           <property name="text">
-            <string>说明：</string>
+           <property name="title">
+            <string/>
            </property>
-           <property name="textFormat">
-            <enum>Qt::PlainText</enum>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="maximumSize">
+               <size>
+                <width>324</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string>说明：</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string>1.建模和预测可以同时进行</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>2.结果存储在同文件夹下</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>230</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
@@ -348,6 +393,9 @@
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="3" column="2" alignment="Qt::AlignHCenter">
              <widget class="QPushButton" name="train_stop_button">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="font">
                <font>
                 <strikeout>false</strikeout>
@@ -429,6 +477,9 @@
             </item>
             <item row="5" column="2" alignment="Qt::AlignHCenter">
              <widget class="QPushButton" name="predict_stop_button">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="font">
                <font>
                 <strikeout>false</strikeout>
