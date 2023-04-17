@@ -401,7 +401,8 @@ class OperateModel:
         :return: 最后会删除临时文件，并且将其删除，然后保存新的文件
         """
         # 从excel读取数据
-        develop_excel_np_data, _, _, _ = CommonUtils.gen_init_data(excel_path=f"{excel_path}", excel_sheet=excel_sheet)
+        develop_excel_np_data, _, _, _ = CommonUtils.gen_init_data(excel_path=f"{excel_path}",
+                                                                     excel_sheet=excel_sheet)
         # 存储标题
         # global all_titles
         # all_titles = develop_excel_np_data[1, :]

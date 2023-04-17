@@ -4,25 +4,18 @@
     @Data : 2022/5/1 17:49
     @File : main.py.py
 """
-import concurrent.futures
-import multiprocessing
 import sys
-import threading
 import time
-from multiprocessing import Process
 from threading import Thread
 
-from PySide6 import QtWidgets, QtCore
-from PySide6.QtCore import Slot, Signal, QThread, QCoreApplication
+import gevent as gevent
+from PySide6 import QtWidgets
+from PySide6.QtCore import Slot, Signal
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QLabel, QApplication, QWidget
 
+from Entry.ApiModel import ModelUse
 from Signal import my_signal
 from zh_appui import Ui_zh_data_app
-
-
-# 继承这个类  py可以多继承
-def computer_model():
-    return False
 
 
 class View(QWidget, Ui_zh_data_app):
@@ -37,7 +30,7 @@ class View(QWidget, Ui_zh_data_app):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.mysignal = Signal()
+        self.mySignal = Signal()
         # 槽函数自定义绑定
         self.bind()
         my_signal.SetProgressBar.emit(self.train_progressBar, "程序未运行...", 0)
@@ -46,7 +39,11 @@ class View(QWidget, Ui_zh_data_app):
         self.train_worker = None
         self.predict_worker = None
         # 设置线程状态
-        self.work_threads = {}
+        self.work_threads = {"develop_work": True, "develop_finished": False, "predict_work": True,
+                             "predict_finished": False}
+        # 建模预测文件的名字
+        self.develop_filename = ""
+        self.predict_filename = ""
 
     def bind(self):
         # 和生成数字按钮绑定
@@ -71,35 +68,73 @@ class View(QWidget, Ui_zh_data_app):
 
     @Slot()
     def on_predict_button_clicked(self):
-        self.work_threads["predict_work"] = True
+        self.work_start(0, self.predict_filename, ["predict_finished", "predict_work"], self.predict_progressBar,
+                        self.predict_button)
 
-        def predict_work_thread():
-            # 设置一格一格动,一直循环
-            i = 0
-            # 让进度条一直循环
-            while True:
-                # 计算结束
-                if computer_model():
-                    break
-                if not self.work_threads["predict_work"]:
-                    my_signal.SetProgressBar.emit(self.predict_progressBar, "运行终止!!!", i)
-                    self.predict_button.setEnabled(True)
-                    self.work_threads["predict_work"] = False
-                    return
-                i += 1
-                if i > 100:
-                    i = 0
-                my_signal.SetProgressBar.emit(self.predict_progressBar, "正在运行...", i)
-                time.sleep(0.1)
-            my_signal.SetProgressBar.emit(self.predict_progressBar, "运行结束...", 100)
-            self.predict_button.setEnabled(True)
-            self.work_threads["predict_work"] = False
+    def work_start(self, is_develop, filename, flag_list, progress_bar, select_button):
+        if filename != "":
+            try:
+                self.work_task(is_develop, filename, flag_list, progress_bar, select_button)
+            except Exception as e:
+                QMessageBox.information(self, '错误', f"{e}")
+        else:
+            QMessageBox.information(self, '提示', "请先选择文件！")
 
-        # 创建子线程
-        worker = Thread(target=predict_work_thread)
-        worker.start()
+    def work_task(self, is_develop, filename, flag_list, progress_bar, select_button):
+        """
+        :param filename:
+        :param is_develop: 1的话就是建模，其他的预测
+        :param flag_list:  例如 ["predict_finished", "predict_work"]
+        :param progress_bar: 进度条
+        :param select_button:  选择的是预测还是选择
+        :return:
+        """
+        # 调用预测模型
+        # 创建子进程
+        progress_worker = Thread(target=self.work_progress,
+                                 args=(flag_list[0], flag_list[1], progress_bar, select_button))
+        progress_worker.start()
         # 禁用按钮
-        self.predict_button.setEnabled(False)
+        select_button.setEnabled(False)
+
+        def inner_work(is_develop, filename, finished_flag):
+            """
+            :param is_develop: 1的话就是建模，其他的预测
+            :param filename:
+            :param finished_flag:
+            :return:
+            """
+            if is_develop == 1:
+                ModelUse.develop_model(filename)
+            else:
+                ModelUse.predict_model(filename)
+            self.work_threads[f"{finished_flag}"] = True
+
+        # inner_work(is_develop, filename, flag_list[0])
+        inner_work_thread = Thread(target=inner_work, args=(is_develop, filename, flag_list[0]))
+        inner_work_thread.start()
+
+    def work_progress(self, finished_flag, work_flag, progress_bar, select_button):
+        # 设置一格一格动,一直循环
+        i = 0
+        # 让进度条一直循环
+        while True:
+            # 计算结束
+            if self.work_threads[f"{finished_flag}"]:
+                break
+            if not self.work_threads[f"{work_flag}"]:
+                my_signal.SetProgressBar.emit(progress_bar, "运行终止!!!", i)
+                select_button.setEnabled(True)
+                self.work_threads[f"{work_flag}"] = False
+                return
+            i += 1
+            if i > 100:
+                i = 0
+            my_signal.SetProgressBar.emit(progress_bar, "正在运行...", i)
+            time.sleep(0.1)
+        my_signal.SetProgressBar.emit(progress_bar, "运行结束...", 100)
+        select_button.setEnabled(True)
+        self.work_threads[f"{work_flag}"] = False
 
     @Slot()  # 提前终止这个线程
     def on_predict_stop_button_clicked(self):
@@ -109,40 +144,13 @@ class View(QWidget, Ui_zh_data_app):
 
     @Slot()
     def on_train_button_clicked(self):
-        self.work_threads["train_work"] = True
-
-        # 开启子线程去操作，并动态显示进度条
-        # todo 需要改成多进程去操作
-        def train_worker_thread():
-            i = 0
-            # 让进度条一直循环
-            while True:
-                # 计算结束
-                if computer_model():
-                    break
-                if not self.work_threads["train_work"]:
-                    my_signal.SetProgressBar.emit(self.train_progressBar, "运行终止!!!", i)
-                    self.predict_button.setEnabled(True)
-                    self.work_threads["train_work"] = False
-                    return
-                i += 1
-                if i > 100:
-                    i = 0
-                my_signal.SetProgressBar.emit(self.train_progressBar, "正在运行...", i)
-                time.sleep(0.1)
-            my_signal.SetProgressBar.emit(self.train_progressBar, "运行结束!", 100)
-            self.train_button.setEnabled(True)
-            self.work_threads["train_work"] = False
-
-        self.train_worker = Thread(target=train_worker_thread)
-        self.train_worker.start()
-        # 禁用按钮
-        self.train_button.setEnabled(False)
+        self.work_start(1, self.develop_filename, ["develop_finished", "develop_work"], self.train_progressBar,
+                        self.train_button)
 
     @Slot()  # 提前终止这个线程
     def on_train_stop_button_clicked(self):
-        if self.work_threads["train_work"]:
-            self.work_threads["train_work"] = False
+        if self.work_threads["develop_work"]:
+            self.work_threads["develop_work"] = False
             self.train_button.setEnabled(True)
 
     @Slot()  # 选择建模文件
@@ -153,6 +161,7 @@ class View(QWidget, Ui_zh_data_app):
         if file_path[0] != '':
             modeling_path = file_path[0].split('/')[-1]
             my_signal.SetLabelValue.emit(modeling_path, self.modeling_file_path)
+            self.develop_filename = file_path[0]
 
     # 选择其他训练模型
     @Slot()
@@ -175,6 +184,7 @@ class View(QWidget, Ui_zh_data_app):
         if file_path[0] != '':
             modeling_path = file_path[0].split('/')[-1]
             my_signal.SetLabelValue.emit(modeling_path, self.predict_file_path)
+            self.predict_filename = file_path[0]
 
     # 去操作 modeling_file_path
     # # 生成数字的编辑栏
@@ -525,16 +535,3 @@ if __name__ == '__main__':
     view.show()
     sys.exit(app.exec())
 
-# if __name__ == '__main__':
-#     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-#     app = QtWidgets.QApplication(sys.argv)
-#     # 设置风格样式 Fusion,windows,windowsvista
-#     app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
-#     # window = QMainWindow() # 看自己的选择
-#     # window = QtWidgets.QWidget()  # 看自己的选择
-#     view = View()
-#     # view.setupUi(window)
-#     # view.setupUi(view)  这个可以放在构造函数中
-#     # window.show()
-#     view.show()
-#     sys.exit(app.exec())
