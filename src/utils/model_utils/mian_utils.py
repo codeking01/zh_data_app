@@ -314,27 +314,7 @@ def get_invert_y(y_develop_data=None, y_verify_data=None):
     return y_develop_data, Verify_Ydata
 
 
-def normalization_develop_y(y_data=None):
-    """
-    :param y_data:建模的Y(源数据，未转化-1 0 1)
-    :return:  y_data, y_data_bounds_min, y_data_bounds_max
-    """
-    # 获取 建模和预测转化好的Y
-    y_data, y_data_bounds_min, y_data_bounds_max = deal_sorted_y_data(data=copy.deepcopy(y_data))
-    return y_data, y_data_bounds_min, y_data_bounds_max
 
-
-def normalization_predict_y(y_data=None, bounds_min=None, bounds_max=None):
-    """
-    :param y_data:
-    :param bounds_min: 建模的时候的归一化的边界min
-    :param bounds_max:
-    :return:
-    """
-    # 验证（预测）的Y
-    data=copy.deepcopy(y_data)
-    data=np.array(data,dtype=float)
-    return deal_verify_ydata(data, bounds_min, bounds_max)
 
 
 def develop_model(x_develop_data=None, x_pred_data=None, y_develop_data=None, y_pred_data=None, final_cols=None,

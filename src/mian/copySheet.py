@@ -54,7 +54,6 @@ def copy_excel_sheet(filename, table_index=1):
 
 
 # copy_excel_sheet(r"C:\Users\king\Desktop\测试.xlsx")
-
 import openpyxl
 import pandas as pd
 from openpyxl.utils.dataframe import dataframe_to_rows
