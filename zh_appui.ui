@@ -141,19 +141,54 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>1.建模放第一个sheet表</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>2.预测放第一个sheet表</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>3.建模预测可以放同一文件</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="label_5">
               <property name="styleSheet">
                <string notr="true"/>
               </property>
               <property name="text">
-               <string>1.建模和预测可以同时进行</string>
+               <string>4.建模和预测可以同时进行</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>注意：需保证前一次训练过！</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QLabel" name="label_6">
               <property name="text">
-               <string>2.结果存储在同文件夹下</string>
+               <string>5.结果存储在同文件夹下</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>注意：“替换模型”功能禁用了</string>
               </property>
              </widget>
             </item>
@@ -168,7 +203,7 @@
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>230</height>
+                <height>150</height>
                </size>
               </property>
              </spacer>
