@@ -9,8 +9,9 @@ class ModelUse:
         pass
 
     @staticmethod
-    def develop_model(select_path):
+    def develop_model(select_path,train_numbers):
         """
+        :param train_numbers: 训练的次数
         :param select_path: 根据选择的excel去建模
         :return:
         """

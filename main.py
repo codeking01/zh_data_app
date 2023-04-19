@@ -44,6 +44,8 @@ class View(QWidget, Ui_zh_data_app):
         self.predict_filename = ""
         self.control_button_stats(self.train_stop_button, False)
         self.control_button_stats(self.predict_stop_button, False)
+        # 获取训练次数
+        self.train_numbers = self.train_number.value()
 
     def control_button_stats(self, button, flag: bool):
         button.setEnabled(flag)
@@ -75,19 +77,19 @@ class View(QWidget, Ui_zh_data_app):
 
     @Slot()
     def on_predict_button_clicked(self):
-        self.work_start(0, self.predict_filename, ["predict_finished"], self.predict_progressBar,
-                        self.predict_button, self.predict_stop_button, "predict")
+        self.work_start(0, self.predict_filename, ["predict_finished"], self.predict_progressBar, self.predict_button,
+                        self.predict_stop_button, "predict")
 
-    def work_start(self, is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread):
+    def work_start(self, is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,train_numbers=1):
         if filename != "":
             try:
-                self.work_task(is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread)
+                self.work_task(is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,train_numbers=train_numbers)
             except Exception as e:
                 QMessageBox.information(self, '错误', f"{e}")
         else:
             QMessageBox.information(self, '提示', "请先选择文件！")
 
-    def work_task(self, is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread):
+    def work_task(self, is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,train_numbers):
         """
         :param filename:
         :param is_develop: 1的话就是建模，其他的预测
@@ -97,7 +99,7 @@ class View(QWidget, Ui_zh_data_app):
         :return:
         """
 
-        def inner_work(is_develop, filename, finished_flag):
+        def inner_work(is_develop, filename, finished_flag,train_numbers):
             """
             :param is_develop: 1的话就是建模，其他的预测
             :param filename:
@@ -105,13 +107,13 @@ class View(QWidget, Ui_zh_data_app):
             :return:
             """
             if is_develop == 1:
-                ModelUse.develop_model(filename)
+                ModelUse.develop_model(filename,train_numbers)
             else:
                 ModelUse.predict_model(filename)
             self.work_threads[f"{finished_flag}"] = True
             self.control_button_stats(stop_button, False)
 
-        self.work_threads[f"{work_thread}"] = Thread(target=inner_work, args=(is_develop, filename, flag_list[0]))
+        self.work_threads[f"{work_thread}"] = Thread(target=inner_work, args=(is_develop, filename, flag_list[0],train_numbers))
         self.work_threads[f"{work_thread}"].start()
 
         # 创建子进程
@@ -173,7 +175,7 @@ class View(QWidget, Ui_zh_data_app):
     @Slot()
     def on_train_button_clicked(self):
         self.work_start(1, self.develop_filename, ["develop_finished"], self.train_progressBar, self.train_button,
-                        self.train_stop_button,"develop")
+                        self.train_stop_button, "develop",self.train_numbers)
 
     @Slot()  # 提前终止这个线程
     def on_train_stop_button_clicked(self):

@@ -17,7 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QGroupBox,
     QHBoxLayout, QLabel, QProgressBar, QPushButton,
-    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
+    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
+    QWidget)
 import res_rc
 
 class Ui_zh_data_app(object):
@@ -234,6 +235,12 @@ class Ui_zh_data_app(object):
         self.groupBox_7.setObjectName(u"groupBox_7")
         self.gridLayout_2 = QGridLayout(self.groupBox_7)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.label_12 = QLabel(self.groupBox_7)
+        self.label_12.setObjectName(u"label_12")
+        self.label_12.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_2.addWidget(self.label_12, 1, 2, 1, 1)
+
         self.modeling_file_path = QLabel(self.groupBox_7)
         self.modeling_file_path.setObjectName(u"modeling_file_path")
         self.modeling_file_path.setMinimumSize(QSize(130, 0))
@@ -241,7 +248,7 @@ class Ui_zh_data_app(object):
         self.modeling_file_path.setFont(font3)
         self.modeling_file_path.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout_2.addWidget(self.modeling_file_path, 0, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.modeling_file_path, 0, 2, 1, 1)
 
         self.load_modeling_files = QPushButton(self.groupBox_7)
         self.load_modeling_files.setObjectName(u"load_modeling_files")
@@ -251,6 +258,14 @@ class Ui_zh_data_app(object):
         self.load_modeling_files.setStyleSheet(u"")
 
         self.gridLayout_2.addWidget(self.load_modeling_files, 0, 0, 1, 1, Qt.AlignLeft)
+
+        self.train_number = QSpinBox(self.groupBox_7)
+        self.train_number.setObjectName(u"train_number")
+        self.train_number.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.train_number.setMinimum(1)
+        self.train_number.setMaximum(999)
+
+        self.gridLayout_2.addWidget(self.train_number, 1, 0, 1, 1)
 
 
         self.gridLayout_5.addWidget(self.groupBox_7, 3, 0, 1, 1)
@@ -360,8 +375,8 @@ class Ui_zh_data_app(object):
         self.label.setText(QCoreApplication.translate("zh_data_app", u"\u6b22\u8fce\u4f7f\u7528", None))
         self.groupBox_5.setTitle("")
         self.label_4.setText(QCoreApplication.translate("zh_data_app", u"\u8bf4\u660e\uff1a", None))
-        self.label_7.setText(QCoreApplication.translate("zh_data_app", u"1.\u5efa\u6a21\u653e\u7b2c\u4e00\u4e2asheet\u8868", None))
-        self.label_8.setText(QCoreApplication.translate("zh_data_app", u"2.\u9884\u6d4b\u653e\u7b2c\u4e00\u4e2asheet\u8868", None))
+        self.label_7.setText(QCoreApplication.translate("zh_data_app", u"1.\u5efa\u6a21\u653e\u7b2c1\u4e2asheet\u8868", None))
+        self.label_8.setText(QCoreApplication.translate("zh_data_app", u"2.\u9884\u6d4b\u653e\u7b2c2\u4e2asheet\u8868", None))
         self.label_9.setText(QCoreApplication.translate("zh_data_app", u"3.\u5efa\u6a21\u9884\u6d4b\u53ef\u4ee5\u653e\u540c\u4e00\u6587\u4ef6", None))
         self.label_5.setText(QCoreApplication.translate("zh_data_app", u"4.\u5efa\u6a21\u548c\u9884\u6d4b\u53ef\u4ee5\u540c\u65f6\u8fdb\u884c", None))
         self.label_11.setText(QCoreApplication.translate("zh_data_app", u"\u6ce8\u610f\uff1a\u9700\u4fdd\u8bc1\u524d\u4e00\u6b21\u8bad\u7ec3\u8fc7\uff01", None))
@@ -374,6 +389,7 @@ class Ui_zh_data_app(object):
         self.groupBox.setTitle("")
         self.train_stop_button.setText(QCoreApplication.translate("zh_data_app", u"\u7ec8\u6b62", None))
         self.groupBox_7.setTitle("")
+        self.label_12.setText(QCoreApplication.translate("zh_data_app", u"\u8bbe\u7f6e\u8bad\u7ec3\u6b21\u6570", None))
         self.modeling_file_path.setText(QCoreApplication.translate("zh_data_app", u"\u6682\u672a\u9009\u62e9", None))
         self.load_modeling_files.setText(QCoreApplication.translate("zh_data_app", u"\u9009\u62e9\u5efa\u6a21\u6587\u4ef6", None))
         self.predict_stop_button.setText(QCoreApplication.translate("zh_data_app", u"\u7ec8\u6b62", None))

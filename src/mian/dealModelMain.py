@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 
 class AssignDataUtils:
@@ -166,8 +167,10 @@ class ModelUtils:
 
     @staticmethod
     def develop_save_model(model=None, model_name=None, model_dict=None, save_path="./all_models",
-                           x_train=None, y_train=None, train_numbers=1):
+                           x_train=None, y_train=None, x_test=None, y_test=None, train_numbers=1):
         """
+        :param x_test:
+        :param y_test:
         :param model: 需要训练的模型
         :param model_name:
         :param model_dict:
@@ -178,8 +181,16 @@ class ModelUtils:
         :return:
         """
         CommonUtils.check_dir(save_path)
-        # 只存储一个大模型
-        model.fit(x_train, y_train.astype(float))
+        # todo 根据 train_numbers决定训练次数，只保留一个最好的模型
+        max_accuracy = 0
+        for i in range(train_numbers):
+            # 只存储一个大模型
+            model.fit(x_train, y_train.astype(float))
+            # 训练完毕后，计算测试数据的模型的准确率
+            train_accuracy = accuracy_score(x_train, y_train.astype(float))
+            if train_accuracy > max_accuracy:
+                max_accuracy = train_accuracy
+
         model_dict.update({f'{model_name}': model})
         # 将字典中的所有模型保存到一个 joblib。可以考虑最后再保存，这样保证训练和预测可以同时进行
         joblib.dump(model_dict, f'{save_path}/models_temp.joblib')
@@ -204,13 +215,13 @@ class OperateExcel:
         df = pd.DataFrame(data_rows[1:], columns=data_rows[0])
         # 使用 DataFrame 对象将数据写入 Excel 文件
         # 获取前面的路径
-        filename=os.path.dirname(filename)+f"\\预测结果.{filename.split('.')[-1]}"
+        filename = os.path.dirname(filename) + f"\\预测结果.{filename.split('.')[-1]}"
         # filename=lambda filename:filename.split("\/")[-1]
         df.to_excel(f"{filename}", sheet_name=f'{sheet_name}', index=False)
 
     @staticmethod
     def record_excel(use_raw_list, excel_col, excel_raw, predict_excel_table, predict_y_item, model_predict_data,
-                     accuracy, max_row,save_filename):
+                     accuracy, max_row, save_filename):
         """
         :param save_filename: 保存的路径与名字
         :param max_row: excel最大列号
@@ -347,8 +358,10 @@ class CommonUtils:
         return init_np_data, table, filename, load_data
 
     @staticmethod
-    def start_develop_model(develop_x_data=None, develop_y_dict=None, model_dict=None, use_x_cols=None):
+    def start_develop_model(develop_x_data=None, develop_y_dict=None, model_dict=None, use_x_cols=None,
+                            train_numbers=None):
         """
+        :param train_numbers: 建模的次数
         :param use_x_cols: 建模的时候用到的列号
         :param model_dict:
         :param develop_x_data:
@@ -371,8 +384,7 @@ class CommonUtils:
             x_train, _, y_train, _ = AssignDataUtils.get_train_test_data(x_data=develop_x_data_copy,
                                                                          y_data=develop_y_item)
             ModelUtils.develop_save_model(model=RandomForestClassifier(), model_name=y_item, model_dict=model_dict,
-                                          x_train=x_train,
-                                          y_train=y_train)
+                                          x_train=x_train, y_train=y_train, train_numbers=train_numbers)
         joblib.dump(model_dict, f'./all_models/models.joblib')
         # 删除models_temp.joblib文件
         os.remove(f'./all_models/models_temp.joblib')
@@ -394,19 +406,16 @@ class OperateModel:
         pass
 
     @staticmethod
-    def select_develop_model(excel_path=None, excel_sheet=0):
+    def select_develop_model(excel_path=None, excel_sheet=0, train_numbers=None):
         """
+        :param train_numbers: 训练的次数
         :param excel_path: 选择路径
         :param excel_sheet: 0 代表第一张表
         :return: 最后会删除临时文件，并且将其删除，然后保存新的文件
         """
         # 从excel读取数据
         develop_excel_np_data, _, _, _ = CommonUtils.gen_init_data(excel_path=f"{excel_path}",
-                                                                     excel_sheet=excel_sheet)
-        # 存储标题
-        # global all_titles
-        # all_titles = develop_excel_np_data[1, :]
-        # 用来训练的x
+                                                                   excel_sheet=excel_sheet)
         x_train_boundary = [[2, 21], [27, 30], [34, 49], [57, 70], [83, 87]]
         # 用来训练的y
         y_train_boundary = [[21, 27], [30, 34], [49, 57], [70, 83], [87, 106]]
@@ -452,9 +461,8 @@ class OperateModel:
             # 存成字典，直接保存去遍历字典
             develop_y_dict = {use_develop_cols[i]: develop_y_data[:, i] for i in range(len(use_develop_cols))}
             print(f"当前内循环{order_y_item[0] + 1},当前excel的索引：{order_y_item[0] + 1}")
-            CommonUtils.start_develop_model(develop_x_data=develop_x_data, use_x_cols=use_x_cols,
-                                            develop_y_dict=develop_y_dict,
-                                            model_dict=model_dict)
+            CommonUtils.start_develop_model(develop_x_data=develop_x_data, develop_y_dict=develop_y_dict,
+                                            model_dict=model_dict, use_x_cols=use_x_cols, train_numbers=train_numbers)
         print("训练运行结束！")
 
     @staticmethod
