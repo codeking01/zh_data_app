@@ -44,8 +44,6 @@ class View(QWidget, Ui_zh_data_app):
         self.predict_filename = ""
         self.control_button_stats(self.train_stop_button, False)
         self.control_button_stats(self.predict_stop_button, False)
-        # 获取训练次数
-        self.train_numbers = self.train_number.value()
 
     def control_button_stats(self, button, flag: bool):
         button.setEnabled(flag)
@@ -175,7 +173,7 @@ class View(QWidget, Ui_zh_data_app):
     @Slot()
     def on_train_button_clicked(self):
         self.work_start(1, self.develop_filename, ["develop_finished"], self.train_progressBar, self.train_button,
-                        self.train_stop_button, "develop",self.train_numbers)
+                        self.train_stop_button, "develop",self.train_number.value())
 
     @Slot()  # 提前终止这个线程
     def on_train_stop_button_clicked(self):

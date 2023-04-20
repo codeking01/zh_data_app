@@ -99,6 +99,16 @@ class Ui_zh_data_app(object):
 
         self.verticalLayout.addWidget(self.label_9)
 
+        self.label_13 = QLabel(self.groupBox_5)
+        self.label_13.setObjectName(u"label_13")
+
+        self.verticalLayout.addWidget(self.label_13)
+
+        self.label_14 = QLabel(self.groupBox_5)
+        self.label_14.setObjectName(u"label_14")
+
+        self.verticalLayout.addWidget(self.label_14)
+
         self.label_5 = QLabel(self.groupBox_5)
         self.label_5.setObjectName(u"label_5")
         self.label_5.setStyleSheet(u"")
@@ -120,7 +130,7 @@ class Ui_zh_data_app(object):
 
         self.verticalLayout.addWidget(self.label_10)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 150, QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.verticalSpacer_2 = QSpacerItem(20, 110, QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
 
@@ -378,6 +388,8 @@ class Ui_zh_data_app(object):
         self.label_7.setText(QCoreApplication.translate("zh_data_app", u"1.\u5efa\u6a21\u653e\u7b2c1\u4e2asheet\u8868", None))
         self.label_8.setText(QCoreApplication.translate("zh_data_app", u"2.\u9884\u6d4b\u653e\u7b2c2\u4e2asheet\u8868", None))
         self.label_9.setText(QCoreApplication.translate("zh_data_app", u"3.\u5efa\u6a21\u9884\u6d4b\u53ef\u4ee5\u653e\u540c\u4e00\u6587\u4ef6", None))
+        self.label_13.setText(QCoreApplication.translate("zh_data_app", u"\u8bad\u7ec3\u5df2\u505a\u4f18\u5316\uff0c\u90091~10\u5373\u53ef", None))
+        self.label_14.setText(QCoreApplication.translate("zh_data_app", u"\u5927\u4e8e10\u6b21\u4f1a\u5f88\u6162", None))
         self.label_5.setText(QCoreApplication.translate("zh_data_app", u"4.\u5efa\u6a21\u548c\u9884\u6d4b\u53ef\u4ee5\u540c\u65f6\u8fdb\u884c", None))
         self.label_11.setText(QCoreApplication.translate("zh_data_app", u"\u6ce8\u610f\uff1a\u9700\u4fdd\u8bc1\u524d\u4e00\u6b21\u8bad\u7ec3\u8fc7\uff01", None))
         self.label_6.setText(QCoreApplication.translate("zh_data_app", u"5.\u7ed3\u679c\u5b58\u50a8\u5728\u540c\u6587\u4ef6\u5939\u4e0b", None))

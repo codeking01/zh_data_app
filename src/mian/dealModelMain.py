@@ -8,6 +8,7 @@ import pandas as pd
 from openpyxl import load_workbook
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
 
 class AssignDataUtils:
@@ -167,7 +168,7 @@ class ModelUtils:
 
     @staticmethod
     def develop_save_model(model=None, model_name=None, model_dict=None, save_path="./all_models",
-                           x_train=None, y_train=None, x_test=None, y_test=None, train_numbers=1):
+                           x_train=None, y_train=None, x_test=None, y_test=None, train_numbers=None):
         """
         :param x_test:
         :param y_test:
@@ -187,9 +188,10 @@ class ModelUtils:
             # 只存储一个大模型
             model.fit(x_train, y_train.astype(float))
             # 训练完毕后，计算测试数据的模型的准确率
-            train_accuracy = accuracy_score(x_train, y_train.astype(float))
-            if train_accuracy > max_accuracy:
-                max_accuracy = train_accuracy
+            test_accuracy = accuracy_score(y_test, model.predict(x_test))
+            if test_accuracy > max_accuracy:
+                max_accuracy = test_accuracy
+                print(f"共{train_numbers}次,当前循环{i}次数,提升了模型准确率:{max_accuracy}")
 
         model_dict.update({f'{model_name}': model})
         # 将字典中的所有模型保存到一个 joblib。可以考虑最后再保存，这样保证训练和预测可以同时进行
@@ -381,13 +383,57 @@ class CommonUtils:
             model_dict[f'{y_item}_data'] = [y_data_bounds_min, y_data_bounds_max], use_x_cols
 
             # 手动划分数据集，各自一半，按照奇偶
-            x_train, _, y_train, _ = AssignDataUtils.get_train_test_data(x_data=develop_x_data_copy,
-                                                                         y_data=develop_y_item)
-            ModelUtils.develop_save_model(model=RandomForestClassifier(), model_name=y_item, model_dict=model_dict,
-                                          x_train=x_train, y_train=y_train, train_numbers=train_numbers)
+            x_train, x_test, y_train, y_test = AssignDataUtils.get_train_test_data(x_data=develop_x_data_copy,
+                                                                                   y_data=develop_y_item)
+            # rfc_model = RandomForestClassifier(n_estimators=10, criterion='entropy', max_depth=5, min_samples_split=10,
+            #                                    min_samples_leaf=5)
+
+            rfc_model = CommonUtils.get_rfc_model(rfc_name="normal", train_numbers=train_numbers)
+
+            ModelUtils.develop_save_model(model=rfc_model, model_name=y_item, model_dict=model_dict,
+                                          x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test,
+                                          train_numbers=train_numbers)
         joblib.dump(model_dict, f'./all_models/models.joblib')
         # 删除models_temp.joblib文件
         os.remove(f'./all_models/models_temp.joblib')
+
+    @staticmethod
+    def get_rfc_model(rfc_name=None, train_numbers=1):
+        """
+        :param train_numbers: 默认是1
+        :param rfc_name: grid_search(很慢),random_search(较慢),normal(快)
+        :return:
+        """
+        select_rfc_model = ''
+        if rfc_name == "grid_search" or (10 < train_numbers < 20):
+            param_grid = {'n_estimators': [50, 100, 150],
+                          'max_depth': [None, 5, 10],
+                          'min_samples_split': [2, 5, 10],
+                          'min_samples_leaf': [1, 2, 5],
+                          'criterion': ['gini', 'entropy']}
+            # 定义随机森林分类器
+            clf = RandomForestClassifier(random_state=42)
+            # 使用网格搜索进行参数调优
+            select_rfc_model = GridSearchCV(clf, param_grid=param_grid, cv=5, n_jobs=-1, scoring='accuracy')
+        elif rfc_name == "random_search" or (20 < train_numbers < 100):
+            # 定义参数范围
+            param_dist = {'n_estimators': list(range(50, 201, 50)),
+                          'max_depth': [None] + list(range(5, 16, 5)),
+                          'min_samples_split': list(range(2, 11, 2)),
+                          'min_samples_leaf': list(range(1, 6)),
+                          'criterion': ['gini', 'entropy']}
+
+            # 定义随机森林分类器
+            clf = RandomForestClassifier(random_state=42)
+
+            # 使用随机搜索进行参数调优
+            select_rfc_model = RandomizedSearchCV(clf, param_distributions=param_dist, n_iter=50, cv=5, n_jobs=-1,
+                                                  scoring='accuracy', random_state=42)
+        elif rfc_name is None or rfc_name == "normal":
+            # 选择最普通的模型
+            select_rfc_model = RandomForestClassifier(n_estimators=30, criterion='entropy', max_depth=5,
+                                                      min_samples_split=10, min_samples_leaf=5, random_state=42)
+        return select_rfc_model
 
     @staticmethod
     def check_dir(save_path):

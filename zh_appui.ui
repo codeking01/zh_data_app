@@ -162,6 +162,20 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>训练已做优化，选1~10即可</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>大于10次会很慢</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="label_5">
               <property name="styleSheet">
                <string notr="true"/>
@@ -203,7 +217,7 @@
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>150</height>
+                <height>110</height>
                </size>
               </property>
              </spacer>
