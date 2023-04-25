@@ -99,16 +99,6 @@ class Ui_zh_data_app(object):
 
         self.verticalLayout.addWidget(self.label_9)
 
-        self.label_13 = QLabel(self.groupBox_5)
-        self.label_13.setObjectName(u"label_13")
-
-        self.verticalLayout.addWidget(self.label_13)
-
-        self.label_14 = QLabel(self.groupBox_5)
-        self.label_14.setObjectName(u"label_14")
-
-        self.verticalLayout.addWidget(self.label_14)
-
         self.label_5 = QLabel(self.groupBox_5)
         self.label_5.setObjectName(u"label_5")
         self.label_5.setStyleSheet(u"")
@@ -130,7 +120,7 @@ class Ui_zh_data_app(object):
 
         self.verticalLayout.addWidget(self.label_10)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 110, QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.verticalSpacer_2 = QSpacerItem(20, 150, QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
 
@@ -247,6 +237,7 @@ class Ui_zh_data_app(object):
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.label_12 = QLabel(self.groupBox_7)
         self.label_12.setObjectName(u"label_12")
+        self.label_12.setMaximumSize(QSize(150, 16777215))
         self.label_12.setAlignment(Qt.AlignCenter)
 
         self.gridLayout_2.addWidget(self.label_12, 1, 2, 1, 1)
@@ -263,7 +254,7 @@ class Ui_zh_data_app(object):
         self.load_modeling_files = QPushButton(self.groupBox_7)
         self.load_modeling_files.setObjectName(u"load_modeling_files")
         self.load_modeling_files.setMinimumSize(QSize(90, 0))
-        self.load_modeling_files.setMaximumSize(QSize(100, 16777215))
+        self.load_modeling_files.setMaximumSize(QSize(100, 100))
         self.load_modeling_files.setCursor(QCursor(Qt.PointingHandCursor))
         self.load_modeling_files.setStyleSheet(u"")
 
@@ -271,8 +262,9 @@ class Ui_zh_data_app(object):
 
         self.train_number = QSpinBox(self.groupBox_7)
         self.train_number.setObjectName(u"train_number")
+        self.train_number.setMaximumSize(QSize(100, 100))
         self.train_number.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-        self.train_number.setMinimum(1)
+        self.train_number.setMinimum(2)
         self.train_number.setMaximum(999)
 
         self.gridLayout_2.addWidget(self.train_number, 1, 0, 1, 1)
@@ -325,7 +317,7 @@ class Ui_zh_data_app(object):
         self.load_predict_files = QPushButton(self.groupBox_6)
         self.load_predict_files.setObjectName(u"load_predict_files")
         self.load_predict_files.setMinimumSize(QSize(90, 0))
-        self.load_predict_files.setMaximumSize(QSize(100, 16777215))
+        self.load_predict_files.setMaximumSize(QSize(100, 100))
         self.load_predict_files.setCursor(QCursor(Qt.PointingHandCursor))
         self.load_predict_files.setStyleSheet(u"")
 
@@ -335,7 +327,7 @@ class Ui_zh_data_app(object):
         self.load_modeling_exist_files.setObjectName(u"load_modeling_exist_files")
         self.load_modeling_exist_files.setEnabled(False)
         self.load_modeling_exist_files.setMinimumSize(QSize(90, 0))
-        self.load_modeling_exist_files.setMaximumSize(QSize(100, 16777215))
+        self.load_modeling_exist_files.setMaximumSize(QSize(100, 100))
         self.load_modeling_exist_files.setCursor(QCursor(Qt.ForbiddenCursor))
         self.load_modeling_exist_files.setStyleSheet(u"")
 
@@ -388,8 +380,6 @@ class Ui_zh_data_app(object):
         self.label_7.setText(QCoreApplication.translate("zh_data_app", u"1.\u5efa\u6a21\u653e\u7b2c1\u4e2asheet\u8868", None))
         self.label_8.setText(QCoreApplication.translate("zh_data_app", u"2.\u9884\u6d4b\u653e\u7b2c2\u4e2asheet\u8868", None))
         self.label_9.setText(QCoreApplication.translate("zh_data_app", u"3.\u5efa\u6a21\u9884\u6d4b\u53ef\u4ee5\u653e\u540c\u4e00\u6587\u4ef6", None))
-        self.label_13.setText(QCoreApplication.translate("zh_data_app", u"\u8bad\u7ec3\u5df2\u505a\u4f18\u5316\uff0c\u90091~10\u5373\u53ef", None))
-        self.label_14.setText(QCoreApplication.translate("zh_data_app", u"\u5927\u4e8e10\u6b21\u4f1a\u5f88\u6162", None))
         self.label_5.setText(QCoreApplication.translate("zh_data_app", u"4.\u5efa\u6a21\u548c\u9884\u6d4b\u53ef\u4ee5\u540c\u65f6\u8fdb\u884c", None))
         self.label_11.setText(QCoreApplication.translate("zh_data_app", u"\u6ce8\u610f\uff1a\u9700\u4fdd\u8bc1\u524d\u4e00\u6b21\u8bad\u7ec3\u8fc7\uff01", None))
         self.label_6.setText(QCoreApplication.translate("zh_data_app", u"5.\u7ed3\u679c\u5b58\u50a8\u5728\u540c\u6587\u4ef6\u5939\u4e0b", None))

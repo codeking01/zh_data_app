@@ -398,41 +398,45 @@ class CommonUtils:
         os.remove(f'./all_models/models_temp.joblib')
 
     @staticmethod
-    def get_rfc_model(rfc_name=None, train_numbers=1):
+    def get_rfc_model(rfc_name=None, train_numbers=1, is_optimize=False):
         """
+        :param is_optimize: 默认不优化，使用默认的参数
         :param train_numbers: 默认是1
         :param rfc_name: grid_search(很慢),random_search(较慢),normal(快)
         :return:
         """
         select_rfc_model = ''
-        if rfc_name == "grid_search" or (10 < train_numbers < 20):
-            param_grid = {'n_estimators': [50, 100, 150],
-                          'max_depth': [None, 5, 10],
-                          'min_samples_split': [2, 5, 10],
-                          'min_samples_leaf': [1, 2, 5],
-                          'criterion': ['gini', 'entropy']}
-            # 定义随机森林分类器
-            clf = RandomForestClassifier(random_state=42)
-            # 使用网格搜索进行参数调优
-            select_rfc_model = GridSearchCV(clf, param_grid=param_grid, cv=5, n_jobs=-1, scoring='accuracy')
-        elif rfc_name == "random_search" or (20 < train_numbers < 100):
-            # 定义参数范围
-            param_dist = {'n_estimators': list(range(50, 201, 50)),
-                          'max_depth': [None] + list(range(5, 16, 5)),
-                          'min_samples_split': list(range(2, 11, 2)),
-                          'min_samples_leaf': list(range(1, 6)),
-                          'criterion': ['gini', 'entropy']}
+        if is_optimize is not False:
+            if rfc_name == "grid_search" or (10 < train_numbers < 20):
+                param_grid = {'n_estimators': [50, 100, 150],
+                              'max_depth': [None, 5, 10],
+                              'min_samples_split': [2, 5, 10],
+                              'min_samples_leaf': [1, 2, 5],
+                              'criterion': ['gini', 'entropy']}
+                # 定义随机森林分类器
+                clf = RandomForestClassifier(random_state=42)
+                # 使用网格搜索进行参数调优
+                select_rfc_model = GridSearchCV(clf, param_grid=param_grid, cv=5, n_jobs=-1, scoring='accuracy')
+            elif rfc_name == "random_search" or (20 < train_numbers < 100):
+                # 定义参数范围
+                param_dist = {'n_estimators': list(range(50, 201, 50)),
+                              'max_depth': [None] + list(range(5, 16, 5)),
+                              'min_samples_split': list(range(2, 11, 2)),
+                              'min_samples_leaf': list(range(1, 6)),
+                              'criterion': ['gini', 'entropy']}
 
-            # 定义随机森林分类器
-            clf = RandomForestClassifier(random_state=42)
+                # 定义随机森林分类器
+                clf = RandomForestClassifier(random_state=42)
 
-            # 使用随机搜索进行参数调优
-            select_rfc_model = RandomizedSearchCV(clf, param_distributions=param_dist, n_iter=50, cv=5, n_jobs=-1,
-                                                  scoring='accuracy', random_state=42)
-        elif rfc_name is None or rfc_name == "normal":
-            # 选择最普通的模型
-            select_rfc_model = RandomForestClassifier(n_estimators=30, criterion='entropy', max_depth=5,
-                                                      min_samples_split=10, min_samples_leaf=5, random_state=42)
+                # 使用随机搜索进行参数调优
+                select_rfc_model = RandomizedSearchCV(clf, param_distributions=param_dist, n_iter=50, cv=5, n_jobs=-1,
+                                                      scoring='accuracy', random_state=42)
+            elif rfc_name is None or rfc_name == "normal":
+                # 选择最普通的模型
+                select_rfc_model = RandomForestClassifier(n_estimators=30, criterion='entropy', max_depth=5,
+                                                          min_samples_split=10, min_samples_leaf=5, random_state=42)
+        select_rfc_model = RandomForestClassifier(n_estimators=30, criterion='entropy', max_depth=5,
+                                                  min_samples_split=10, min_samples_leaf=5, random_state=42)
         return select_rfc_model
 
     @staticmethod
@@ -595,6 +599,6 @@ class OperateModel:
 
 if __name__ == '__main__':
     # 这个是建模的函数接口
-    # OperateModel.select_develop_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx")
+    OperateModel.select_develop_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx")
     # 这个是预测的函数接口
     OperateModel.select_predict_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx")

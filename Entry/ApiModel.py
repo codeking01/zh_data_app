@@ -9,13 +9,13 @@ class ModelUse:
         pass
 
     @staticmethod
-    def develop_model(select_path,train_numbers):
+    def develop_model(select_path, train_numbers):
         """
         :param train_numbers: 训练的次数
         :param select_path: 根据选择的excel去建模
         :return:
         """
-        OperateModel.select_develop_model(excel_path=f"{select_path}",train_numbers=train_numbers)
+        OperateModel.select_develop_model(excel_path=f"{select_path}", train_numbers=train_numbers)
 
     @staticmethod
     def predict_model(select_path):
@@ -24,5 +24,3 @@ class ModelUse:
         :return:
         """
         OperateModel.select_predict_model(select_path)
-
-
