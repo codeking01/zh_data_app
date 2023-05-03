@@ -4,6 +4,13 @@
 from src.mian.dealModelMain import OperateModel
 
 
+class StateUtils:
+    def __init__(self):
+        """ 维护状态
+        """
+        pass
+
+
 class ModelUse:
     def __init__(self):
         pass
@@ -23,4 +30,4 @@ class ModelUse:
         :param select_path:   根据选择的excel去预测
         :return:
         """
-        OperateModel.select_predict_model(select_path)
+        OperateModel.select_predict_model(excel_path=f"{select_path}")

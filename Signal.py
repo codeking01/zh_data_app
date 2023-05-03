@@ -13,7 +13,7 @@ class MySignal(QObject):
     # SetConvertState=Signal(str)
     SetLabelValue = Signal(str, object)
     # 程序运行结束的弹窗
-    PopWindow = Signal(str)
+    PopWindow = Signal(list)
 
 
 my_signal = MySignal()

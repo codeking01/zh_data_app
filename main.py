@@ -56,8 +56,8 @@ class View(QWidget, Ui_zh_data_app):
         my_signal.SetLabelValue.connect(self.set_all_label_value)
         my_signal.PopWindow.connect(self.pop_window)
 
-    def pop_window(self, value: str):
-        QMessageBox.information(self, "成功！", f"{value}")
+    def pop_window(self, title_value: list):
+        QMessageBox.information(self, f"{title_value[0]}！", f"{title_value[1]}")
 
     # 设置label的内容
     def set_all_label_value(self, value: str, components: QLabel):
@@ -78,16 +78,19 @@ class View(QWidget, Ui_zh_data_app):
         self.work_start(0, self.predict_filename, ["predict_finished"], self.predict_progressBar, self.predict_button,
                         self.predict_stop_button, "predict")
 
-    def work_start(self, is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,train_numbers=1):
+    def work_start(self, is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,
+                   train_numbers=1):
         if filename != "":
             try:
-                self.work_task(is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,train_numbers=train_numbers)
+                self.work_task(is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,
+                               train_numbers=train_numbers)
             except Exception as e:
                 QMessageBox.information(self, '错误', f"{e}")
         else:
             QMessageBox.information(self, '提示', "请先选择文件！")
 
-    def work_task(self, is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,train_numbers):
+    def work_task(self, is_develop, filename, flag_list, progress_bar, select_button, stop_button, work_thread,
+                  train_numbers):
         """
         :param filename:
         :param is_develop: 1的话就是建模，其他的预测
@@ -97,21 +100,29 @@ class View(QWidget, Ui_zh_data_app):
         :return:
         """
 
-        def inner_work(is_develop, filename, finished_flag,train_numbers):
+        def inner_work(is_develop, filename, finished_flag, train_numbers):
             """
             :param is_develop: 1的话就是建模，其他的预测
             :param filename:
             :param finished_flag:
             :return:
             """
-            if is_develop == 1:
-                ModelUse.develop_model(filename,train_numbers)
-            else:
-                ModelUse.predict_model(filename)
-            self.work_threads[f"{finished_flag}"] = True
-            self.control_button_stats(stop_button, False)
+            try:
+                if is_develop == 1:
+                    ModelUse.develop_model(filename, train_numbers)
+                else:
+                    ModelUse.predict_model(filename)
+                self.work_threads[f"{finished_flag}"] = True
+                self.control_button_stats(stop_button, False)
+            except Exception as e:
+                my_signal.PopWindow.emit(["失败", f"出现异常：{e}，可联系开发者!"])
+            finally:
+                self.work_threads[f"{finished_flag}"] = True
+                self.control_button_stats(stop_button, False)
 
-        self.work_threads[f"{work_thread}"] = Thread(target=inner_work, args=(is_develop, filename, flag_list[0],train_numbers))
+
+        self.work_threads[f"{work_thread}"] = Thread(target=inner_work,
+                                                     args=(is_develop, filename, flag_list[0], train_numbers))
         self.work_threads[f"{work_thread}"].start()
 
         # 创建子进程
@@ -146,7 +157,7 @@ class View(QWidget, Ui_zh_data_app):
         my_signal.SetProgressBar.emit(progress_bar, "运行结束...", 100)
         select_button.setEnabled(True)
         self.work_threads[f"{finished_flag}"] = False
-        my_signal.PopWindow.emit("程序运行结束！")
+        my_signal.PopWindow.emit(["成功", "程序运行结束！"])
 
     # 进度条归位
     def back_zero(self, left_button, right_button, flag_list, progress_bar):
@@ -173,7 +184,7 @@ class View(QWidget, Ui_zh_data_app):
     @Slot()
     def on_train_button_clicked(self):
         self.work_start(1, self.develop_filename, ["develop_finished"], self.train_progressBar, self.train_button,
-                        self.train_stop_button, "develop",self.train_number.value())
+                        self.train_stop_button, "develop", self.train_number.value())
 
     @Slot()  # 提前终止这个线程
     def on_train_stop_button_clicked(self):

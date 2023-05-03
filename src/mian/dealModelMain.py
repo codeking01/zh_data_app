@@ -61,7 +61,10 @@ class AssignDataUtils:
         :return:
         """
         excel_data_copy = copy.deepcopy(excel_data)
-        return excel_data_copy[boundary_x[0]:boundary_x[-1], boundary_y[0]:boundary_y[-1]]
+        # 记得将最后一行加进去，需要添加一个 []
+        return np.r_[
+            excel_data_copy[boundary_x[0]:boundary_x[-1], boundary_y[0]:boundary_y[-1]], [excel_data_copy[boundary_x[-1],
+                                                                                          boundary_y[0]:boundary_y[-1]]]]
 
 
 class DataUtils:
@@ -228,7 +231,7 @@ class OperateExcel:
         :param save_filename: 保存的路径与名字
         :param max_row: excel最大列号
         :param accuracy: 准确率
-        :param use_raw_list: 可以的列
+        :param use_raw_list: use_raw_list[0]是可以用的列，use_raw_list[1]是不可用的列
         :param excel_col: excel当前的列号
         :param excel_raw: excel当前的行号
         :param predict_excel_table:  excel当前的sheet
@@ -238,11 +241,42 @@ class OperateExcel:
         """
         # 写入excel里面
         for i in range(use_raw_list.size):
-            predict_excel_table.cell(use_raw_list[i] + excel_raw,
-                                     excel_col).value = f"real:{predict_y_item[i]},predict:{model_predict_data[i]}"
+            predict_excel_table.cell(use_raw_list[i] + excel_raw, excel_col).value = f"{model_predict_data[i]}"
+        # for i in range(excel_raw, max_row + 1):
+        #     if predict_excel_table.cell(i, excel_col).value is None:
+        #         predict_excel_table.cell(i, excel_col).value = f"缺数据！"
         # 最后写上准确率
         predict_excel_table.cell(max_row, excel_col).value = f"{accuracy}"
-        OperateExcel.copy_excel_pd(ws=predict_excel_table, filename=f"{save_filename}", sheet_name="new_sheet")
+        OperateExcel.copy_excel_pd(ws=predict_excel_table, filename=f"{save_filename}", sheet_name="预测结果表")
+
+    @staticmethod
+    def write_un_use(rows=None, cols=None, table=None, save_filename=None, sheet_name=None):
+        """
+        :param rows: 要写的行 是一个列表 [4,max_row]
+        :param cols:   是一个列表
+        :param table:
+        :param save_filename:
+        :param sheet_name:
+        :return:
+        """
+        for i in cols:
+            for r in rows:
+                table.cell(r, i).value = f"未建模！"
+        OperateExcel.copy_excel_pd(ws=table, filename=f"{save_filename}", sheet_name="new_sheet")
+
+    @staticmethod
+    def wipe_data(excel_table=None, raw_list=None, col_list=None):
+        """
+        :param excel_table:
+        :param raw_list:
+        :param col_list:
+        :return: 将表下面的数据清空
+        """
+        raw_list = [i for i in range(raw_list[0], raw_list[-1] + 1)]
+        col_list = [i for i in range(col_list[0], col_list[-1] + 1)]
+        for i in col_list:
+            for r in raw_list:
+                excel_table.cell(r, i).value = None
 
 
 class CleanData:
@@ -281,10 +315,8 @@ class CleanData:
     @staticmethod
     def record_deletion(del_list=None, use_x_cols=None):
         """
-        :param
-        del_list: 需要删除的列
-        :param
-        use_x_cols: 原始列表（包含所有）
+        :param del_list: 需要删除的列
+        :param use_x_cols: 原始列表（包含所有）
         :return:
         """
         # 找到为0的列号
@@ -476,7 +508,7 @@ class OperateModel:
             # 记录excel 的索引
             develop_y_index_list = [i for i in
                                     range(y_train_boundary[order_index][0], y_train_boundary[order_index][-1])]
-            # 记录使用了哪些x列,从2开始
+            # 记录使用了哪些x列,从2开始 todo 需要叠加之前的列
             use_x_cols = np.array([0 for _ in range(x_train_boundary[order_index][-1] - x_train_boundary[0][0])])
             order_x_item = x_train_boundary[order_index]
             order_y_item = y_train_boundary[order_index]
@@ -488,10 +520,12 @@ class OperateModel:
                                                                    boundary_y=[order_y_item[0], order_y_item[-1]])
             # 转化月份
             develop_x_data = DataUtils.convert_to_month(x_data=develop_x_data)
+            # todo 排除out列
+
             # 将建模中的X存在的字母，汉字 记录这个列
             exit_alpha_list = CommonUtils.check_contains_letters_or_chinese(develop_x_data)
             # 对应的列填充1
-            CleanData.record_deletion(exit_alpha_list, use_x_cols)
+            CleanData.record_deletion(del_list=exit_alpha_list, use_x_cols=use_x_cols)
             develop_x_data = np.delete(develop_x_data, exit_alpha_list, 1)
             # 删除缺失值过多的列，并保存del_cols,记录缺失值大于0.3的列
             develop_x_data, del_cols = CleanData.del_raw_col_data(develop_x_data, 1)
@@ -534,6 +568,9 @@ class OperateModel:
         y_predict_boundary = [[21, 27], [30, 34], [49, 57], [70, 83], [87, 106]]
         # 获取存储模型的字典
         all_models = joblib.load(f'{develop_model_path}')
+        # todo 删除excel其他的数据
+        OperateExcel.wipe_data(excel_table=predict_excel_table, raw_list=[x_predict_boundary[0][0] + 3, max_row],
+                               col_list=[3,y_predict_boundary[-1][-1]])
         # 跑每一道工序的循环
         for order_index in range(len(x_predict_boundary)):
             # 当前excel行号,其实就是3
@@ -599,6 +636,6 @@ class OperateModel:
 
 if __name__ == '__main__':
     # 这个是建模的函数接口
-    OperateModel.select_develop_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx")
+    OperateModel.select_develop_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx", train_numbers=2)
     # 这个是预测的函数接口
     OperateModel.select_predict_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx")
