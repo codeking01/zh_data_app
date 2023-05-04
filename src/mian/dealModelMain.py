@@ -278,6 +278,21 @@ class OperateExcel:
             for r in raw_list:
                 excel_table.cell(r, i).value = None
 
+    @staticmethod
+    def record_head(excel_table=None, row_boundary=None, col_boundary=None, write_data=None):
+        """
+        :param col_boundary:
+        :param write_data:
+        :param excel_table:
+        :param row_boundary: [起始，结束]，包头不包尾
+        :return:
+        """
+        raw_list = [i for i in range(row_boundary[0], row_boundary[-1] + 1)]
+        col_list = [i for i in range(col_boundary[0], col_boundary[-1] + 1)]
+        for i in col_list:
+            for r in raw_list:
+                excel_table.cell(r, i).value = write_data[:, i - col_boundary[0]][r - row_boundary[0]]
+
 
 class CleanData:
     def __init__(self):
@@ -570,7 +585,13 @@ class OperateModel:
         all_models = joblib.load(f'{develop_model_path}')
         # todo 删除excel其他的数据
         OperateExcel.wipe_data(excel_table=predict_excel_table, raw_list=[x_predict_boundary[0][0] + 3, max_row],
-                               col_list=[3,y_predict_boundary[-1][-1]])
+                               col_list=[3, y_predict_boundary[-1][-1]])
+        # 单独取出来头信息
+        vital_head_data = AssignDataUtils.get_develop_pred_data(excel_data=predict_excel_np_data, boundary_x=[3, -1],
+                                                                boundary_y=[2, 4])
+        # 存入Excel
+        OperateExcel.record_head(excel_table=predict_excel_table, row_boundary=[x_predict_boundary[0][0] + 3, max_row - 1],
+                                 col_boundary=[3, 4], write_data=vital_head_data)
         # 跑每一道工序的循环
         for order_index in range(len(x_predict_boundary)):
             # 当前excel行号,其实就是3
@@ -623,6 +644,7 @@ class OperateModel:
                     model_predict_data = model.predict(predict_x_item)
                     model_predict_data = np.array(model_predict_data, dtype=int)
                     # 记录准确率  要去除空值再去计算准确率 排查最后几个准确率很低的原因 排查excel损坏的原因,这个地方需要排除predict_y_item空值
+                    # 如果是 nan，说明预测的和归一化的没有交集
                     predict_accuracy = np.where([model_predict_data - predict_y_item][0] == 0)[0][:].size / np.sum(
                         np.logical_not(np.isnan(predict_y_item)))
                     print(f"predict_accuracy：{predict_accuracy}")
@@ -636,6 +658,6 @@ class OperateModel:
 
 if __name__ == '__main__':
     # 这个是建模的函数接口
-    OperateModel.select_develop_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx", train_numbers=2)
+    # OperateModel.select_develop_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx", train_numbers=2)
     # 这个是预测的函数接口
     OperateModel.select_predict_model(excel_path=r"C:\Users\king\Desktop\0221结果 - 副本.xlsx")
